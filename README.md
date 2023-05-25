@@ -5,6 +5,9 @@ Project structure:
 ```
 .
 ├── docker-compose.yml
+├── dockerfile
+├── init.sql
+├── mysql-connector-j-8.0.32.jar
 ├── app
     └── test.cfm
     └── dumpserver.cfm
@@ -27,8 +30,6 @@ EXPOSE 3333
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -yq install mysql-server mysql-client
 
-
-# Create testdb database
 RUN service mysql start
 
 
