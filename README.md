@@ -8,21 +8,70 @@ Project structure:
 ├── app
     └── test.cfm
     └── dumpserver.cfm
+    └── Application.cfm
+    └── index.cfm
+    └── Users.cfc
+
+```
+[_dockerfile_](dockerfile)
+```
+FROM adobecoldfusion/coldfusion2021:latest
+
+COPY mysql-connector-j-8.0.32.jar /opt/coldfusion/cfusion/lib/mysql-connector-j-8.0.32.jar
+
+# Expose MySQL port
+EXPOSE 3333
+
+
+# Install MySQL server and client
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -yq install mysql-server mysql-client
+
+
+# Create testdb database
+RUN service mysql start
+
+
 
 ```
 
 [_docker-compose.yml_](docker-compose.yml)
 ```
+version: "3"
 services:
-    coldfusion: 
-        image: adobecoldfusion/coldfusion2021:latest
-        ports:
-        - "8500:8500"
-        environment:
-            - acceptEULA=YES
-            - password=123
-        volumes:
-            - ./app:/app
+  coldfusion:
+    container_name: mycoldfusion
+    build: .
+    ports:
+      - "8555:8555"
+    environment:
+        - acceptEULA=YES
+        - password=Pwd4cf!23
+    volumes:
+      - ./app:/app
+    networks:
+      - my_network
+    depends_on:
+        - mysql
+    restart: on-failure
+
+  mysql:
+    container_name: mymysql
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydatabase
+    ports:
+      - "3333:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - my_network
+networks:
+  my_network:
+
 ```
 
 ## Deploy with docker-compose
@@ -43,26 +92,40 @@ cf-2021-latest-coldfusion-1  | Starting ColdFusion
 
 ## Expected result
 
-Listing containers must show one container running and the port mapping as below (note that the version reported may differ for you, in using the "latest" tag):
-```
-$ docker ps
-CONTAINER ID   IMAGE                                     COMMAND                  CREATED          STATUS                    PORTS                                         NAMES
-a7df2d9ffc26   adobecoldfusion/coldfusion2021:2021.0.2   "sh /opt/startup/sta…"   6 minutes ago   Up 6 minutes (healthy)   8118/tcp, 45564/tcp, 0.0.0.0:8500->8500/tcp   cf-2021-coldfusion-1
-```
 
-After the application starts, navigate to `http://localhost:8500` in your web browser to see available files in CF's default webroot (added to by the /app volume mapping)
+After the application starts, navigate to `http://localhost:8555` in your web browser to see available files in CF's default webroot (added to by the /app volume mapping). Mysql will be availabe on port 3333.
 
-Or run `http://localhost:8500/test.cfm` in your web browser to see the test page in the mapped /app folder, or run via curl:
+Or run `http://localhost:8555/test.cfm` in your web browser to see the test page in the mapped /app folder, or run via curl:
 ```
-$ curl http://localhost:8500/test.cfm
+$ curl http://localhost:8555/test.cfm
 
 Which will show:
 Hello World! at 03-Oct-2021 02:25:44
 ```
-Run this to see a dump of the server.coldfusion struct within the container: navigate to `http://localhost:8500/dumpserver.cfm` in your web browser or run:
+Run this to see a dump of the server.coldfusion struct within the container: navigate to `http://localhost:8555/dumpserver.cfm` in your web browser or run:
 ```
-$ curl http://localhost:8500/dumpserver.cfm
+$ curl http://localhost:8555/dumpserver.cfm
 ```
+Coldfusion Demo CRUD application
+```
+$ http://localhost:8555
+```
+Coldfusion Administrator
+```
+$ http://localhost:8555/CFIDE/administrator/index.cfm
+```
+
+## Credentials
+
+Coldfusion
+    ```
+    admin: Pwd4cf!23
+    ```
+Mysql
+    ```
+    root: root
+    ```
+
 
 Stop and remove the containers
 ```
