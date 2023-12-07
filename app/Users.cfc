@@ -50,11 +50,27 @@
 	</cffunction>
 
 	<!--- Delete a user record from the database. --->
-	<cffunction name="deleteUser" access="remote" returntype="void">
+	<cffunction name="deleteUser" access="remote" returntype="boolean">
 		<cfargument name="userId" type="numeric" required="true">
+	
+		<cfquery datasource="mydatabase" name="total">
+			SELECT COUNT(*) AS rowCount from users
+		</cfquery>
 
-		<cfquery datasource="mydatabase">
+		<cfquery datasource="mydatabase" name="deleteRow">
 			DELETE FROM users WHERE id = #arguments.userId#
 		</cfquery>
+
+		<cfquery datasource="mydatabase" name="totalAfter">
+			SELECT COUNT(*) AS rowCount from users
+		</cfquery>
+	
+		<cfif total.rowCount EQ totalAfter.rowCount>
+			<cfreturn false>
+		<cfelse>
+			<cfreturn true>
+		</cfif>
 	</cffunction>
+	
+	
 </cfcomponent>

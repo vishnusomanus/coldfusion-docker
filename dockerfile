@@ -1,4 +1,4 @@
-FROM adobecoldfusion/coldfusion2021:latest
+FROM adobecoldfusion/coldfusion:latest-2023
 
 COPY mysql-connector-j-8.0.32.jar /opt/coldfusion/cfusion/lib/mysql-connector-j-8.0.32.jar
 

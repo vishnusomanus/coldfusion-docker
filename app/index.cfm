@@ -48,14 +48,21 @@
 <cfset usersQuery = usersObj.readUsers()>
 
 <div  class="container mt-5">
+	<a href="/" class="btn btn-primary mb-2">Add</a>
+	<a href="/xl.cfm" class="btn btn-primary mb-2 float-right">CSV</a>
+	<a href="/pdf.cfm" class="btn btn-primary mb-2 float-right mr-2">PDF</a>	
     <cfif structKeyExists(url, "delete_id") AND isNumeric(url.delete_id)>
         <cfset id = url.delete_id>
         
         <cfset usersObj = new Users()>
         <cfset user = usersObj.deleteUser(id)>
+		<cfif user eq true>
+			<cflocation url="/?delete_id=#id#" addtoken="false">
+		</cfif>
         <div class="alert alert-success" role="alert">
             User with ID <cfoutput>#id#</cfoutput> deleted successfully.
         </div>
+
     </cfif>
     <table class="table table-bordered">
         <thead>
@@ -86,11 +93,12 @@
     </table>
 </div>
 
-<cfset formData = {}> <!--- Initialize an empty struct to store form data --->
+<cfset formData = structNew()>
 <cfset formData.firstName = "">
-		<cfset formData.lastName = "">
-		<cfset formData.email = "">
-		<cfset formData.phone = "">
+<cfset formData.lastName = "">
+<cfset formData.email = "">
+<cfset formData.phone = "">
+
 <cfset editMode = false> <!--- Assume not in edit mode by default --->
 
 <!--- Check if an "id" parameter is present in the URL --->

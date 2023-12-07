@@ -93,6 +93,15 @@ cf-2021-latest-coldfusion-1  | Starting ColdFusion
 
 ## Expected result
 
+```
+$ http://localhost:8555/CFIDE/administrator/index.cfm
+```
+login to CFIDE.
+
+  ```
+  admin: Pwd4cf!23
+  ```
+Install Pdf and html to pdf Module 
 
 After the application starts, navigate to `http://localhost:8555` in your web browser to see available files in CF's default webroot (added to by the /app volume mapping). Mysql will be availabe on port 3333.
 
